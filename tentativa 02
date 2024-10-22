@@ -1,0 +1,35 @@
+class Carro:
+    def __init__(self, modelo, marca, ano, valor_por_dia):
+        self.modelo = modelo
+        self.marca = marca
+        self.ano = ano
+        self.valor_por_dia = valor_por_dia
+        self.disponivel = True
+
+    def alugar(self, dias):
+        if self.disponivel:
+            self.disponivel = False
+            return dias * self.valor_por_dia
+        else:
+            return "Carro indisponível."
+
+class Cliente:
+    def __init__(self, nome, cpf):
+        self.nome = nome
+        self.cpf = cpf
+
+def alugar_carro(cliente, carro, dias):
+    valor = carro.alugar(dias)
+    if isinstance(valor, float):
+        print(f"Aluguel realizado com sucesso! Valor total: R${valor:.2f}")
+    else:
+        print(valor)
+
+# Criando alguns carros e clientes
+carro1 = Carro("Gol", "Volkswagen", 2020, 100)
+carro2 = Carro("Corolla", "Toyota", 2022, 150)
+
+cliente1 = Cliente("João Silva", "12345678901")
+
+# Realizando um aluguel
+alugar_carro(cliente1, carro1, 5)
