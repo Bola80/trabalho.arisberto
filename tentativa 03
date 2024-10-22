@@ -1,0 +1,77 @@
+import datetime
+
+class Cliente:
+    def __init__(self, nome, cpf):
+        self.nome = nome
+        self.cpf = cpf
+        self.alugueis = []
+
+class Carro:
+    def __init__(self, modelo, marca, ano, cor, preco, km=0, seguro=False):
+        self.modelo = modelo
+        self.marca = marca
+        self.ano = ano
+        self.cor = cor
+        self.preco = preco
+        self.km = km
+        self.disponivel = True
+        self.seguro = seguro
+        self.historico_manutencao = []
+
+    def alugar(self, cliente, data_inicio, data_fim):
+        if self.disponivel:
+            self.disponivel = False
+            # Calcular o valor do aluguel com base em uma taxa diária e período
+            taxa_diaria = 50  # Valor fictício, pode ser ajustado
+            dias_aluguel = (data_fim - data_inicio).days
+            valor_total = dias_aluguel * taxa_diaria
+            print(f"Carro {self.modelo} alugado para {cliente.nome} por R${valor_total:.2f}.")
+            # Adicionar o aluguel ao histórico do carro
+            self.historico_manutencao.append(
+                {"tipo": "Aluguel", "data_inicio": data_inicio, "data_fim": data_fim, "cliente": cliente.nome}
+            )
+        else:
+            print("Carro indisponível.")
+
+    def devolver(self, km_final):
+        if not self.disponivel:
+            self.disponivel = True
+            self.km = km_final
+            # Verificar se houve algum dano e calcular possíveis multas
+            # ...
+            print("Carro devolvido com sucesso.")
+        else:
+            print("O carro não está alugado.")
+
+    def calcular_valor_seguro(self, valor_veiculo):
+        # Calcular o valor do seguro com base no valor do veículo
+        taxa_seguro = 0.02  # 2% do valor do veículo
+        return valor_veiculo * taxa_seguro
+
+    def adicionar_manutencao(self, descricao, data):
+        self.historico_manutencao.append({"tipo": "Manutenção", "descricao": descricao, "data": data})
+
+    def imprimir_informacoes(self):
+        print(f"Modelo: {self.modelo}")
+        print(f"Marca: {self.marca}")
+        print(f"Ano: {self.ano}")
+        print(f"Cor: {self.cor}")
+        print(f"Preço: R${self.preco:.2f}")
+        print(f"Disponível: {self.disponivel}")
+        print(f"Kilometragem: {self.km} km")
+
+carro1 = Carro("Gol", "Volkswagen", 2020, "Prata", 250)
+
+print(carro1.modelo)  
+print()
+carro1.cor = "Azul"
+print(carro1.cor)  
+print()
+
+cliente1 = Cliente("João Silva", "1234567890")  
+carro1.alugar(cliente1, datetime.date(2023, 11, 25), datetime.date(2023, 11, 30))
+
+carro1.devolver(10000) 
+
+carro1.imprimir_informacoes()
+
