@@ -1,0 +1,144 @@
+import datetime
+import json
+
+class Cliente:
+    def __init__(self, nome, cpf):
+        self.nome = nome
+        self.cpf = cpf
+        self.alugueis = []
+
+    def adicionar_aluguel(self, carro, data_inicio, data_fim, valor_total):
+        aluguel = {
+            "carro": carro.modelo,
+            "data_inicio": data_inicio.strftime("%Y-%m-%d"),
+            "data_fim": data_fim.strftime("%Y-%m-%d"),
+            "valor_total": valor_total
+        }
+        self.alugueis.append(aluguel)
+
+    def mostrar_historico_alugueis(self):
+        print(f"Histórico de aluguéis de {self.nome}:")
+        for aluguel in self.alugueis:
+            print(f"{aluguel['carro']} - {aluguel['data_inicio']} a {aluguel['data_fim']} - R${aluguel['valor_total']:.2f}")
+
+    def to_dict(self):
+        return {
+            "nome": self.nome,
+            "cpf": self.cpf,
+            "alugueis": self.alugueis
+        }
+
+class Carro:
+    def __init__(self, modelo, marca, ano, cor, preco, km=0, seguro=False, disponivel=True):
+        self.modelo = modelo
+        self.marca = marca
+        self.ano = ano
+        self.cor = cor
+        self.preco = preco
+        self.km = km
+        self.disponivel = disponivel
+        self.seguro = seguro
+        self.historico_manutencao = []
+
+    def alugar(self, cliente, data_inicio, data_fim):
+        if not self.disponivel:
+            print("Carro indisponível.")
+            return
+
+        if data_inicio >= data_fim:
+            print("Período de aluguel inválido.")
+            return
+
+        taxa_diaria = 50
+        dias_aluguel = (data_fim - data_inicio).days
+        valor_total = dias_aluguel * taxa_diaria
+
+        self.disponivel = False
+        cliente.adicionar_aluguel(self, data_inicio, data_fim, valor_total)
+        self.historico_manutencao.append(
+            {"tipo": "Aluguel", "data_inicio": data_inicio.strftime("%Y-%m-%d"), "data_fim": data_fim.strftime("%Y-%m-%d"), "cliente": cliente.nome}
+        )
+        print(f"Carro {self.modelo} alugado para {cliente.nome} por R${valor_total:.2f}.")
+
+    def devolver(self, km_final):
+        if self.disponivel:
+            print("O carro não está alugado.")
+            return
+
+        self.disponivel = True
+        self.km = km_final
+        print("Carro devolvido com sucesso.")
+
+    def adicionar_manutencao(self, descricao, data):
+        self.historico_manutencao.append({"tipo": "Manutenção", "descricao": descricao, "data": data.strftime("%Y-%m-%d")})
+
+    def imprimir_informacoes(self):
+        print(f"Modelo: {self.modelo}")
+        print(f"Marca: {self.marca}")
+        print(f"Ano: {self.ano}")
+        print(f"Cor: {self.cor}")
+        print(f"Preço: R${self.preco:.2f}")
+        print(f"Disponível: {self.disponivel}")
+        print(f"Kilometragem: {self.km} km")
+
+    def to_dict(self):
+        return {
+            "modelo": self.modelo,
+            "marca": self.marca,
+            "ano": self.ano,
+            "cor": self.cor,
+            "preco": self.preco,
+            "km": self.km,
+            "disponivel": self.disponivel,
+            "seguro": self.seguro,
+            "historico_manutencao": self.historico_manutencao
+        }
+
+# Funções para carregar e salvar dados em JSON
+
+def carregar_dados():
+    try:
+        with open("dados.json", "r") as file:
+            dados = json.load(file)
+            clientes = [Cliente(**c) for c in dados["clientes"]]
+            carros = [Carro(**c) for c in dados["carros"]]
+            return clientes, carros
+    except FileNotFoundError:
+        return [], []
+
+def salvar_dados(clientes, carros):
+    dados = {
+        "clientes": [cliente.to_dict() for cliente in clientes],
+        "carros": [carro.to_dict() for carro in carros]
+    }
+    with open("dados.json", "w") as file:
+        json.dump(dados, file, indent=4)
+
+# Testando o programa
+
+clientes, carros = carregar_dados()
+
+# Criando novos clientes e carros caso o JSON esteja vazio
+if not clientes:
+    cliente1 = Cliente("João Silva", "1234567890")
+    clientes.append(cliente1)
+
+if not carros:
+    carro1 = Carro("Gol", "Volkswagen", 2020, "Prata", 250)
+    carros.append(carro1)
+
+# Alugar o carro e devolver
+carros[0].alugar(clientes[0], datetime.date(2023, 11, 25), datetime.date(2023, 11, 30))
+carros[0].devolver(10000)
+carros[0].imprimir_informacoes()
+clientes[0].mostrar_historico_alugueis()
+
+# Salvar dados no JSON
+salvar_dados(clientes, carros)
+Explicação das Funções de Carregamento e Salvamento
+carregar_dados():
+
+Abre o arquivo dados.json e carrega os dados.
+Converte os dados em instâncias das classes Cliente e Carro.
+Caso o arquivo dados.json não exista, retorna listas vazias.
+salvar_dados(clientes, carros):
